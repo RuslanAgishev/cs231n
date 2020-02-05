@@ -30,19 +30,27 @@ def svm_loss_naive(W, X, y, reg):
     for i in range(num_train):
         scores = X[i].dot(W)
         correct_class_score = scores[y[i]]
+        loss_contrib_factor = 0.0
         for j in range(num_classes):
             if j == y[i]:
                 continue
             margin = scores[j] - correct_class_score + 1 # note delta = 1
             if margin > 0:
                 loss += margin
+                # incorrect labels contribution
+                dW[:,j] += X[i]
+                loss_contrib_factor += 1
+        dW[:,y[i]] -= loss_contrib_factor * X[i]
+        
 
     # Right now the loss is a sum over all training examples, but we want it
     # to be an average instead so we divide by num_train.
     loss /= num_train
+    dW /= num_train
 
     # Add regularization to the loss.
     loss += reg * np.sum(W * W)
+    dW += 2 *reg * W
 
     #############################################################################
     # TODO:                                                                     #
@@ -52,11 +60,6 @@ def svm_loss_naive(W, X, y, reg):
     # loss is being computed. As a result you may need to modify some of the    #
     # code above to compute the gradient.                                       #
     #############################################################################
-    # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
-    # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     
     return loss, dW
 
@@ -70,6 +73,7 @@ def svm_loss_vectorized(W, X, y, reg):
     """
     loss = 0.0
     dW = np.zeros(W.shape) # initialize the gradient as zero
+    num_train = X.shape[0]
 
     #############################################################################
     # TODO:                                                                     #
@@ -78,7 +82,17 @@ def svm_loss_vectorized(W, X, y, reg):
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    scores = X.dot(W) # scores matrix for each img and class label
+    correct_scores = scores[list(range(num_train)), y] # vector of scores of correct label for each img
+    correct_scores = correct_scores.reshape(num_train, -1)
+    
+    # compute the loss
+    scores = scores - correct_scores + 1
+    scores[list(range(num_train)), y] = 0
+    scores = np.multiply(scores, scores>0)
+    loss = np.sum(scores) / num_train
+    # Add regularization to the loss.
+    loss += reg * np.sum(W * W)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -93,7 +107,13 @@ def svm_loss_vectorized(W, X, y, reg):
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    X_mask = np.zeros(scores.shape)
+    X_mask[scores > 0] = 1
+    X_mask[np.arange(num_train), y] = -np.sum(X_mask, axis=1)
+    dW = X.T.dot(X_mask)
+    dW /= num_train
+    # Add a regularization term to the gradients
+    dW += 2 *reg * W
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
