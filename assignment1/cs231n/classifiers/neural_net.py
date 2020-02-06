@@ -80,7 +80,9 @@ class TwoLayerNet(object):
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        h1 = np.fmax(0, X.dot(W1) + b1) # ReLU as activation
+        h2 = h1.dot(W2) + b2
+        scores = h2
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -98,8 +100,13 @@ class TwoLayerNet(object):
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
-
+        #scores -= scores.max()
+        scores = np.exp(scores)
+        scores_sums = np.sum(scores, axis=1)
+        cors = scores[range(N), y]
+        loss = cors / scores_sums
+        loss = -np.sum(np.log(loss)) / N + reg * (np.sum(W1 * W1) + np.sum(W2 * W2))
+        
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
         # Backward pass: compute gradients
@@ -111,7 +118,21 @@ class TwoLayerNet(object):
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        s = np.divide(scores, scores_sums.reshape(N, 1))
+        s[range(N), y] = - (scores_sums - cors) / scores_sums
+        s /= N
+        dW2 = h1.T.dot(s)
+        # db2 = np.ones((1, num_train)).dot(s)
+        db2 = np.sum(s, axis=0)
+        hidden = s.dot(W2.T)
+        hidden[h1 == 0] = 0
+        dW1 = X.T.dot(hidden)
+        # db1 = np.ones((1, num_train)).dot(hidden)
+        db1 = np.sum(hidden, axis=0)
+        grads['W2'] = dW2 + 2 * reg * W2
+        grads['b2'] = db2
+        grads['W1'] = dW1 + 2 * reg * W1
+        grads['b1'] = db1
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -156,7 +177,9 @@ class TwoLayerNet(object):
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            pass
+            indexes = np.random.choice(num_train, batch_size)
+            X_batch = X[indexes, :]
+            y_batch = y[indexes]
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -172,7 +195,10 @@ class TwoLayerNet(object):
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            pass
+            self.params['W1'] -= learning_rate*grads['W1']
+            self.params['W2'] -= learning_rate*grads['W2']
+            self.params['b1'] -= learning_rate*grads['b1']
+            self.params['b2'] -= learning_rate*grads['b2']
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -218,7 +244,12 @@ class TwoLayerNet(object):
         ###########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        W1 = self.params['W1']; b1 = self.params['b1']
+        W2 = self.params['W2']; b2 = self.params['b2']
+        
+        h1 = X.dot(W1) + b1 # 1-st layer pass
+        h2 = np.fmax(0, h1).dot(W2) + b2 # 2-nd layer
+        y_pred = np.argmax(h2, axis=1) # choose labels out of the scores
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
