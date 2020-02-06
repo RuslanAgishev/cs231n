@@ -25,7 +25,7 @@ cd cs231n/datasets
   
 - Q3: Implement a Softmax classifier
 
-  The IPython Notebook [softmax.ipynb](https://github.com/RuslanAgishev/cs231n/tree/master/assignment1/svm.ipynb)
+  The IPython Notebook [softmax.ipynb](https://github.com/RuslanAgishev/cs231n/tree/master/assignment1/softmax.ipynb)
   will walk you through implementing the Softmax classifier.
   
 - Q4: Two-Layer Neural Network
