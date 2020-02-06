@@ -4,6 +4,7 @@
 ## Installation
 ```bash
 conda create -n cs231n python=3 anaconda
+conda activate cs231n
 ```
 ### Assignment 1
 ```
