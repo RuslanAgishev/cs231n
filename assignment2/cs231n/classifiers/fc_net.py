@@ -184,6 +184,7 @@ class FullyConnectedNet(object):
         self.num_layers = 1 + len(hidden_dims)
         self.dtype = dtype
         self.params = {}
+        self.dims = np.hstack((input_dim, hidden_dims, num_classes))
 
         ############################################################################
         # TODO: Initialize the parameters of the network, storing all values in    #
@@ -197,22 +198,10 @@ class FullyConnectedNet(object):
         # beta2, etc. Scale parameters should be initialized to ones and shift     #
         # parameters should be initialized to zeros.                               #
         ############################################################################
-        # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         
-        # 1-st layer params
-        self.params['W1'] = weight_scale * np.random.randn(input_dim, hidden_dims[0])
-        self.params['b1'] = np.zeros(hidden_dims[0])
-        for i in range(1, len(hidden_dims)):
-            self.params['W'+str(i+1)] = weight_scale * np.random.randn(hidden_dims[i-1], hidden_dims[i])
-            self.params['b'+str(i+1)] = np.zeros(hidden_dims[i])
-        # last layer params
-        self.params['W'+str(self.num_layers)] = weight_scale * np.random.randn(hidden_dims[-1], num_classes)
-        self.params['b'+str(self.num_layers)] = np.zeros(num_classes)
-
-        # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-        ############################################################################
-        #                             END OF YOUR CODE                             #
-        ############################################################################
+        for i in range(len(self.dims)-1):
+            self.params['W'+str(i+1)] = weight_scale * np.random.rand(self.dims[i], self.dims[i+1])
+            self.params['b'+str(i+1)] = np.zeros(self.dims[i+1])
 
         # When using dropout we need to pass a dropout_param dictionary to each
         # dropout layer so that the layer knows the dropout probability and the mode
@@ -228,11 +217,14 @@ class FullyConnectedNet(object):
         # normalization layer. You should pass self.bn_params[0] to the forward pass
         # of the first batch normalization layer, self.bn_params[1] to the forward
         # pass of the second batch normalization layer, etc.
+        
         self.bn_params = []
         if self.normalization=='batchnorm':
             self.bn_params = [{'mode': 'train'} for i in range(self.num_layers - 1)]
+
         if self.normalization=='layernorm':
             self.bn_params = [{} for i in range(self.num_layers - 1)]
+            
 
         # Cast all parameters to the correct datatype
         for k, v in self.params.items():
@@ -273,9 +265,14 @@ class FullyConnectedNet(object):
         # forward pass
         h = X; caches = []
         for i in range(self.num_layers-1):
-            W = self.params['W'+str(i+1)]
-            b = self.params['b'+str(i+1)]
-            h, cache = affine_relu_forward(h, W, b)
+            W     = self.params['W'+str(i+1)]
+            b     = self.params['b'+str(i+1)]
+            gamma = np.ones(self.dims[i+1])
+            beta  = np.zeros(self.dims[i+1])
+            if self.normalization is None:
+                h, cache = affine_relu_forward(h, W, b)
+            elif self.normalization == 'batchnorm':
+                h, cache = affine_batchnorm_relu_forward(h, W, b, gamma, beta, self.bn_params[i])
             caches.append(cache)
         i+=1
         h, cache = affine_forward(h, self.params['W'+str(i+1)], self.params['b'+str(i+1)])
@@ -317,7 +314,10 @@ class FullyConnectedNet(object):
         grads['W'+str(self.num_layers)] = dw + self.reg * self.params['W'+str(self.num_layers)] # add regularization
         grads['b'+str(self.num_layers)] = db
         for i in range(self.num_layers-2,-1,-1):
-            dout, dw, db = affine_relu_backward(dout, caches[i])
+            if self.normalization is None:
+                dout, dw, db = affine_relu_backward(dout, caches[i])
+            elif self.normalization == 'batchnorm':
+                dout, dw, db = affine_batchnorm_relu_backward(dout, caches[i])
             grads['W'+str(i+1)] = dw + self.reg * self.params['W'+str(i+1)] # add regularization
             grads['b'+str(i+1)] = db
 
