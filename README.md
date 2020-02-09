@@ -37,3 +37,15 @@ cd cs231n/datasets
   The IPython Notebook [features.ipynb](https://github.com/RuslanAgishev/cs231n/tree/master/assignment1/features.ipynb)
   will walk you through this exercise, in which you will examine the improvements gained
   by    using higher-level representations as opposed to using raw pixel values.
+
+
+### Assignmnet 2
+- Q1: Fully-connected Neural Network
+  The IPython notebook [FullyConnectedNets.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/FullyConnectedNets.ipynb)
+  will introduce you to our modular layer design, and then use those layers to
+  implement fully-connected networks of arbitrary depth. To optimize these models you will implement several popular update
+  rules.
+  
+- Q2: Batch Normalization
+  In the IPython notebook [BatchNormalization.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/BatchNormalization.ipynb)
+  you will implement batch normalization, and use it to train deep fully-connected networks.
