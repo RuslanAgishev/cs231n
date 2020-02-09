@@ -9,7 +9,7 @@ conda activate cs231n
 ### Assignment 1
 ```
 cd assignment1
-pip install -r --ignore-installed requirements.txt
+./install_packages.sh
 cd cs231n/datasets
 ./get_datasets.sh
 ```
@@ -40,6 +40,13 @@ cd cs231n/datasets
 
 
 ### Assignmnet 2
+```
+cd assignment2
+./install_packages.sh
+cd cs231n/datasets
+./get_datasets.sh
+```
+
 - Q1: Fully-connected Neural Network
   The IPython notebook [FullyConnectedNets.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/FullyConnectedNets.ipynb)
   will introduce you to our modular layer design, and then use those layers to
