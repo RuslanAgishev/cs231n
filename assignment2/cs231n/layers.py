@@ -630,8 +630,31 @@ def conv_forward_naive(x, w, b, conv_param):
     # Hint: you can use the function np.pad for padding.                      #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
+    
+    # define dimensions and params
+    N, C, H, W = x.shape
+    F, C, HH, WW = w.shape
+    
+    s = conv_param['stride']; pad = conv_param['pad']
+    
+    H_out = 1 + (H + 2 * pad - HH) // s
+    W_out = 1 + (W + 2 * pad - WW) // s
+    
+    # padded input for convolutions
+    x_pad = np.pad(x, ((0, 0), (0, 0), (pad, pad), (pad, pad)), 'constant', constant_values=0)
+    
+    # define output with proper dimensions
+    out = np.zeros([N, F, H_out, W_out])
+    
+    # compute output with 4 loops
+    for n in range(N):
+        for f in range(F):
+            for i in range(H_out):
+                for j in range(W_out):
+                    # y = x * w + b,
+                    # where *-convolution operation, x - small part of image
+                    # w - one filter, b - filter bias
+                    out[n,f,i,j] = (x_pad[n, :, s*i:s*i+HH, s*j:s*j+WW] * w[f,:,:,:]).sum() + b[f]
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -660,8 +683,37 @@ def conv_backward_naive(dout, cache):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
-
+    # define dimensions and params
+    x, w, b, conv_param = cache
+    N, C, H, W = x.shape
+    F, C, HH, WW = w.shape
+    s = conv_param['stride']; pad = conv_param['pad']
+    
+    H_out = 1 + (H + 2 * pad - HH) // s
+    W_out = 1 + (W + 2 * pad - WW) // s
+    
+    # padded input for convolutions
+    x_pad = np.pad(x, ((0, 0), (0, 0), (pad, pad), (pad, pad)), 'constant', constant_values=0)
+    
+    # define output with proper dimensions
+    dx_pad = np.zeros_like(x_pad)
+    db = np.zeros_like(b)
+    dw = np.zeros_like(w)
+    
+    # compute output with 4 loops
+    for n in range(N):
+        for f in range(F):
+            db[f] += dout[n, f].sum()
+            for i in range(H_out):
+                for j in range(W_out):
+                    # dx = dout * w, *-convolution operation
+                    dx_pad[n, :, s*i:s*i+HH, s*j:s*j+WW] += w[f] * dout[n, f, i, j]
+                    
+                    # dw = x_pad * dout
+                    dw[f] += x_pad[n, :, s*i:s*i+HH, s*j:s*j+WW] * dout[n, f, i, j]
+    
+    dx = dx_pad[:,:,pad:pad+H, pad:pad+W]
+    
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -694,7 +746,23 @@ def max_pool_forward_naive(x, pool_param):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    # define dimensions and params
+    N, C, H, W = x.shape
+    
+    pool_height, pool_width, s = pool_param['pool_height'], pool_param['pool_width'], pool_param['stride']
+    
+    H_out = 1 + (H - pool_height) // s
+    W_out = 1 + (W - pool_width) // s
+    
+    # define output with proper dimensions
+    out = np.zeros([N, C, H_out, W_out])
+    
+    # compute output with 4 loops
+    for n in range(N):
+        for c in range(C):
+            for i in range(H_out):
+                for j in range(W_out):
+                    out[n,c,i,j] = np.max(x[n, c, s*i:s*i+pool_height, s*j:s*j+pool_width])
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -721,7 +789,24 @@ def max_pool_backward_naive(dout, cache):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    # Extract constants and shapes
+    x, pool_param = cache
+    N, C, H, W = x.shape
+    HH = pool_param['pool_height']
+    WW = pool_param['pool_width']
+    stride = pool_param['stride']
+    H_out = 1 + (H - HH) // stride
+    W_out = 1 + (W - WW) // stride
+    # Construct output
+    dx = np.zeros_like(x)
+    # Naive Loops
+    for n in range(N):
+        for c in range(C):
+            for j in range(H_out):
+                for i in range(W_out):
+                    ind = np.argmax(x[n, c, j*stride:j*stride+HH, i*stride:i*stride+WW])
+                    ind1, ind2 = np.unravel_index(ind, (HH, WW))
+                    dx[n, c, j*stride:j*stride+HH, i*stride:i*stride+WW][ind1, ind2] = dout[n, c, j, i]
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################

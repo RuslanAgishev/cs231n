@@ -121,7 +121,7 @@ class TwoLayerNet(object):
         loss, dout = softmax_loss(scores, y)
         # add regularization to the loss
         loss += 0.5 * self.reg*( np.sum(W1*W1) + np.sum(W2*W2) )
-        # backword pass
+        # backward pass
         dx2, dw2, db2 = affine_backward(dout, cache2)
         dx1, dw1, db1 = affine_relu_backward(dx2, cache1)
         # add regularization to gradients
