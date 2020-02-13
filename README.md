@@ -56,3 +56,9 @@ cd cs231n/datasets
 - Q2: Batch Normalization
   In the IPython notebook [BatchNormalization.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/BatchNormalization.ipynb)
   you will implement batch normalization, and use it to train deep fully-connected networks.
+
+- Q3: Dropout
+The IPython notebook [Dropout.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/Dropout.ipynb) will help you implement Dropout and explore its effects on model generalization.
+
+- Q4: Convolutional Networks
+In the IPython Notebook [ConvolutionalNetworks.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/ConvolutionalNetworks.ipynb) you will implement several new layers that are commonly used in convolutional networks.
