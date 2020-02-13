@@ -39,7 +39,7 @@ cd cs231n/datasets
   by    using higher-level representations as opposed to using raw pixel values.
 
 
-### Assignmnet 2
+### Assignment 2
 ```
 cd assignment2
 ./install_packages.sh
