@@ -267,25 +267,34 @@ class FullyConnectedNet(object):
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
         # forward pass
-        h = X; caches = []
+        h = X; caches = []; dropout_caches = []
         for i in range(self.num_layers-1):
             W     = self.params['W'+str(i+1)]
             b     = self.params['b'+str(i+1)]
             
             if self.normalization is None:
                 h, cache = affine_relu_forward(h, W, b)
+                
             elif self.normalization == 'batchnorm':
                 gamma = self.params['gamma'+str(i+1)]
                 beta  = self.params['beta'+str(i+1)]
                 h, cache = affine_batchnorm_relu_forward(h, W, b, gamma, beta, self.bn_params[i])
+                
             elif self.normalization == 'layernorm':
                 gamma = self.params['gamma'+str(i+1)]
                 beta  = self.params['beta'+str(i+1)]
                 h, cache = affine_layernorm_relu_forward(h, W, b, gamma, beta, self.ln_params[i])
+                
+            if self.use_dropout:
+                h, dropout_cache = dropout_forward(h, self.dropout_param)
+                dropout_caches.append(dropout_cache)
+                
             caches.append(cache)
+            
         i+=1
         h, cache = affine_forward(h, self.params['W'+str(i+1)], self.params['b'+str(i+1)])
         caches.append(cache)
+        
         scores = h
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -318,11 +327,17 @@ class FullyConnectedNet(object):
         # add regularization to the loss
         for i in range(self.num_layers):
             loss += 0.5 * self.reg*( np.sum(self.params['W'+str(i+1)]**2) )
+            
         # backward pass
         dout, dw, db = affine_backward(dout, caches[-1])
         grads['W'+str(self.num_layers)] = dw + self.reg * self.params['W'+str(self.num_layers)] # add regularization
         grads['b'+str(self.num_layers)] = db
+        
         for i in range(self.num_layers-2,-1,-1):
+            
+            if self.use_dropout:
+                dout = dropout_backward(dout, dropout_caches[i])
+                
             if self.normalization is None:
                 dout, dw, db = affine_relu_backward(dout, caches[i])
             elif self.normalization == 'batchnorm':
