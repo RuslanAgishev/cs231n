@@ -848,7 +848,52 @@ def spatial_batchnorm_forward(x, gamma, beta, bn_param):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    mode = bn_param['mode']
+    eps = bn_param.get('eps', 1e-5)
+    momentum = bn_param.get('momentum', 0.9)
+
+    N, C, H, W = x.shape
+    running_mean = bn_param.get('running_mean', np.zeros((C, H, W), dtype=x.dtype))
+    running_var = bn_param.get('running_var', np.zeros((C, H, W), dtype=x.dtype))
+
+    out, cache = None, None
+    
+    if mode == 'train':
+        #step1: calculate mean
+        mu = 1./N * np.sum(x, axis = 0)
+        #step2: subtract mean vector of every trainings example
+        xmu = x - mu
+        #step3: following the lower branch - calculation denominator
+        sq = xmu ** 2
+        #step4: calculate variance
+        var = 1./N * np.sum(sq, axis = 0)
+        #step5: add eps for numerical stability, then sqrt
+        sqrtvar = np.sqrt(var + eps)
+        #step6: invert sqrtwar
+        ivar = 1./sqrtvar
+        #step7: execute normalization
+        xhat = xmu * ivar
+        #step8
+        out = gamma.reshape(1, C, 1, 1) * xhat + beta.reshape(1, C, 1, 1)
+
+        # Make the record of means and variances in running parameters
+        running_mean = momentum * running_mean + (1 - momentum) * mu
+        running_var = momentum * running_var + (1 - momentum) * var
+        
+        #store intermediate
+        cache = (xhat,gamma,xmu,ivar,sqrtvar,var,eps)
+        
+    elif mode == 'test':
+        
+        x_upd = (x - running_mean) / np.sqrt(running_var + eps)
+        out = gamma.reshape(1, C, 1, 1) * x_upd + beta.reshape(1, C, 1, 1)
+        
+    else:
+        raise ValueError('Invalid forward batchnorm mode "%s"' % mode)
+
+    # Store the updated running means back into bn_param
+    bn_param['running_mean'] = running_mean
+    bn_param['running_var'] = running_var
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -882,7 +927,37 @@ def spatial_batchnorm_backward(dout, cache):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    #unfold the variables stored in cache
+    xhat,gamma,xmu,ivar,sqrtvar,var,eps = cache
+
+    #get the dimensions of the input/output
+    N, C, H, W = dout.shape
+
+    # https://kratzert.github.io/2016/02/12/understanding-the-gradient-flow-through-the-batch-normalization-layer.html
+    #step9
+    dbeta = np.sum(dout, axis=(0,2,3))
+    dgammax = dout #not necessary, but more understandable
+    #step8
+    dgamma = np.sum(dgammax*xhat, axis=(0,2,3))
+    dxhat = dgammax * gamma.reshape(1,C,1,1)
+    #step7
+    divar = np.sum(dxhat*xmu, axis=0)
+    dxmu1 = dxhat * ivar
+    #step6
+    dsqrtvar = -1. /(sqrtvar**2) * divar
+    #step5
+    dvar = 0.5 * 1. /np.sqrt(var+eps) * dsqrtvar
+    #step4
+    dsq = 1. /N * np.ones((N,C,H,W)) * dvar
+    #step3
+    dxmu2 = 2 * xmu * dsq
+    #step2
+    dx1 = (dxmu1 + dxmu2)
+    dmu = -1 * np.sum(dxmu1+dxmu2, axis=0)
+    #step1
+    dx2 = 1. /N * np.ones((N,C,H,W)) * dmu
+    #step0
+    dx = dx1 + dx2
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -922,7 +997,27 @@ def spatial_groupnorm_forward(x, gamma, beta, G, gn_param):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    N, C, H, W = x.shape
+    
+    #step1: calculate mean
+    mu = np.sum(x, axis = 1) /C
+    #step2: subtract mean vector of every trainings example
+    xmu = x - mu.reshape(N,1,H,W)
+    #step3: following the lower branch - calculation denominator
+    sq = xmu ** 2
+    #step4: calculate variance
+    var = np.sum(sq, axis = 1) /C
+    #step5: add eps for numerical stability, then sqrt
+    sqrtvar = np.sqrt(var + eps)
+    #step6: invert sqrtwar
+    ivar = 1./sqrtvar
+    #step7: execute normalization
+    xhat = xmu * ivar.reshape(N,1,H,W)
+    #step8
+    out = gamma * xhat + beta
+
+    #store intermediate
+    cache = (xhat,gamma,xmu,ivar,sqrtvar,var,eps)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -952,7 +1047,37 @@ def spatial_groupnorm_backward(dout, cache):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    #unfold the variables stored in cache
+    xhat,gamma,xmu,ivar,sqrtvar,var,eps = cache
+
+    #get the dimensions of the input/output
+    N, C, H, W = dout.shape
+
+    # https://kratzert.github.io/2016/02/12/understanding-the-gradient-flow-through-the-batch-normalization-layer.html
+    #step9
+    dbeta = np.sum(dout, axis=(0,2,3)).reshape(1,C,1,1)
+    dgammax = dout #not necessary, but more understandable
+    #step8
+    dgamma = np.sum(dgammax*xhat, axis=(0,2,3)).reshape(1,C,1,1)
+    dxhat = dgammax * gamma
+    #step7
+    divar = np.sum(dxhat*xmu, axis=1)
+    dxmu1 = dxhat * ivar.reshape(N,1,H,W)
+    #step6
+    dsqrtvar = -1. /(sqrtvar**2) * divar
+    #step5
+    dvar = 0.5 * 1. /np.sqrt(var+eps) * dsqrtvar
+    #step4
+    dsq = 1. /C * np.ones((N,C,H,W)) * dvar.reshape(N,1,H,W)
+    #step3
+    dxmu2 = 2 * xmu * dsq
+    #step2
+    dx1 = (dxmu1 + dxmu2)
+    dmu = -1 * np.sum(dxmu1+dxmu2, axis=1)
+    #step1
+    dx2 = 1. /C * np.ones((N,C,H,W)) * dmu.reshape(N,1,H,W)
+    #step0
+    dx = dx1 + dx2
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
