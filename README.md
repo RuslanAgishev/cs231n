@@ -62,3 +62,6 @@ The IPython notebook [Dropout.ipynb](https://github.com/RuslanAgishev/cs231n/blo
 
 - Q4: Convolutional Networks
 In the IPython Notebook [ConvolutionalNetworks.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/ConvolutionalNetworks.ipynb) you will implement several new layers that are commonly used in convolutional networks.
+
+- Q5: PyTorch on CIFAR-10
+Here ([PyTorch.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/PyTorch.ipynb)), you will learn how the framework works, culminating in training a convolutional network of your own design on CIFAR-10 to get the best performance you can.
