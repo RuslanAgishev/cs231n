@@ -1,3 +1,10 @@
+# cache
 __pycache__
 *.pyc
 .ipynb_checkpoints
+
+# large files
+*.pth
+*.h5
+*.zip
+coco_captioning
