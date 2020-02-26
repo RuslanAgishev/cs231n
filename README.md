@@ -42,3 +42,10 @@ cd cs231n/datasets
 
 - [x] Q5: PyTorch/TensorFlow on CIFAR-10, [PyTorch.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/PyTorch.ipynb),
 [TensorFlow.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/TensorFlow.ipynb)
+
+### Assignment 3
+- [ ] Q1: Image Captioning with Vanilla RNNs
+- [ ] Q2: Image Captioning with LSTMs
+- [ ] Q3: Network Visualization: Saliency maps, Class Visualization, and Fooling Images
+- [ ] Q4: Style Transfer
+- [ ] Q5: Generative Adversarial Networks
