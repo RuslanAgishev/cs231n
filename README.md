@@ -44,7 +44,7 @@ cd cs231n/datasets
 [TensorFlow.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/TensorFlow.ipynb)
 
 ### Assignment 3
-- [ ] Q1: Image Captioning with Vanilla RNNs
+- [x] Q1: Image Captioning with Vanilla RNNs
 - [ ] Q2: Image Captioning with LSTMs
 - [ ] Q3: Network Visualization: Saliency maps, Class Visualization, and Fooling Images
 - [ ] Q4: Style Transfer
