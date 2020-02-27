@@ -142,8 +142,29 @@ class CaptioningRNN(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
-
+        """ forward pass """
+        # (1)
+        # h0 = features.dot(W_proj) + b_proj
+        h0, affine_cache = affine_forward(features, W_proj, b_proj)
+        # (2)
+        x, word_embed_cache = word_embedding_forward(captions_in, W_embed)
+        # (3)
+        h, rnn_forward_cache = rnn_forward(x, h0, Wx, Wh, b)
+        # (4)
+        h, temporal_affine_cache = temporal_affine_forward(h, W_vocab, b_vocab)
+        # (5)
+        loss, dout = temporal_softmax_loss(h, captions_out, mask)
+        
+        """ backward pass """
+        # (4)
+        dh, grads['W_vocab'], grads['b_vocab'] = temporal_affine_backward(dout, temporal_affine_cache)
+        # (3)
+        dh, dh0, grads['Wx'], grads['Wh'], grads['b'] = rnn_backward(dh, rnn_forward_cache)
+        # (2)
+        grads['W_embed'] = word_embedding_backward(dh, word_embed_cache)
+        # (1)
+        _, grads['W_proj'], grads['b_proj'] = affine_backward(dh0, affine_cache)
+        
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
         #                             END OF YOUR CODE                             #
@@ -211,7 +232,16 @@ class CaptioningRNN(object):
         ###########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        h0 = features.dot(W_proj) + b_proj
+        start = (self._start * np.ones(N)).astype(np.int32)
+        x = W_embed[start, :]
+
+        h = h0
+        for t in range(max_length):
+            h, _ = rnn_step_forward(x, h, Wx, Wh, b)
+            y = h.dot(W_vocab) + b_vocab
+            captions[:, t] = np.argmax(y, axis=1)
+            x = W_embed[captions[:, t], :]
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################

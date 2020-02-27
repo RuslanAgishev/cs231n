@@ -36,8 +36,10 @@ def rnn_step_forward(x, prev_h, Wx, Wh, b):
     ##############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    h_linear = np.dot(prev_h, Wh) + np.dot(x, Wx) + b.reshape(1,-1)
+    next_h = np.tanh(h_linear)
 
+    cache = Wx, Wh, x, prev_h, h_linear
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ##############################################################################
     #                               END OF YOUR CODE                             #
@@ -69,7 +71,14 @@ def rnn_step_backward(dnext_h, cache):
     ##############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    Wx, Wh, x, prev_h, h_linear = cache
+
+    dh_linear = (1 / np.cosh(h_linear)**2) * dnext_h
+    dx = np.dot(dh_linear, Wx.T)
+    dprev_h = np.dot(dh_linear, Wh.T)
+    dWx = np.dot(x.T, dh_linear)
+    dWh = np.dot(prev_h.T, dh_linear)
+    db = np.sum(dh_linear, axis=0)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ##############################################################################
@@ -96,15 +105,24 @@ def rnn_forward(x, h0, Wx, Wh, b):
     - h: Hidden states for the entire timeseries, of shape (N, T, H).
     - cache: Values needed in the backward pass
     """
-    h, cache = None, None
+
     ##############################################################################
     # TODO: Implement forward pass for a vanilla RNN running on a sequence of    #
     # input data. You should use the rnn_step_forward function that you defined  #
     # above. You can use a for loop to help compute the forward pass.            #
     ##############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
+    
+    N, T, D = x.shape
+    H = h0.shape[1]
+    h = np.zeros([N, T, H])
+    h_t = h0; cache = []
+    for t in range(T):
+        x_t = x[:,t,:]
+        h_t, cache_t = rnn_step_forward(x_t, h_t, Wx, Wh, b)
+        
+        h[:,t,:] = h_t
+        cache.append( cache_t )
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ##############################################################################
@@ -140,8 +158,24 @@ def rnn_backward(dh, cache):
     ##############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
-
+    N, T, H = dh.shape
+    D = cache[0][0].shape[0]
+    
+    dx = np.zeros([N, T, D])
+    dWx = np.zeros([D, H])
+    dWh = np.zeros([H, H])
+    db = np.zeros(H)
+        
+    dprev_h = 0
+    for t in reversed(range(T)):
+        dh_ag = dh[:,t,:] + dprev_h
+        dx_t, dprev_h, dWx_t, dWh_t, db_t = rnn_step_backward(dh_ag, cache[t])
+        dWx += dWx_t
+        dWh += dWh_t
+        db += db_t
+        dx[:, t, :] = dx_t    
+    dh0 = dprev_h
+    
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ##############################################################################
     #                               END OF YOUR CODE                             #
@@ -172,7 +206,8 @@ def word_embedding_forward(x, W):
     ##############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    out = W[x, :]
+    cache = x, W
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ##############################################################################
@@ -205,7 +240,9 @@ def word_embedding_backward(dout, cache):
     ##############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    x, W = cache
+    dW = np.zeros_like(W)
+    np.add.at(dW, x, dout)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ##############################################################################
