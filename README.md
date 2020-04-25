@@ -46,6 +46,6 @@ cd cs231n/datasets
 ### Assignment 3
 - [x] Q1: Image Captioning with Vanilla RNNs
 - [ ] Q2: Image Captioning with LSTMs
-- [ ] Q3: Network Visualization: Saliency maps, Class Visualization, and Fooling Images
-- [ ] Q4: Style Transfer
+- [x] Q3: Network Visualization: Saliency maps, Class Visualization, and Fooling Images
+- [x] Q4: Style Transfer
 - [ ] Q5: Generative Adversarial Networks
