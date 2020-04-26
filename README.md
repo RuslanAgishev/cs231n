@@ -48,4 +48,4 @@ cd cs231n/datasets
 - [ ] Q2: Image Captioning with LSTMs
 - [x] Q3: Network Visualization: Saliency maps, Class Visualization, and Fooling Images, [NetworkVisualization-PyTorch.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment3/NetworkVisualization-PyTorch.ipynb)
 - [x] Q4: Style Transfer, [StyleTransfer-PyTorch.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment3/StyleTransfer-PyTorch.ipynb)
-- [ ] Q5: Generative Adversarial Networks
+- [x] Q5: Generative Adversarial Networks, [Generative_Adversarial_Networks_PyTorch.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment3/Generative_Adversarial_Networks_PyTorch.ipynb)
