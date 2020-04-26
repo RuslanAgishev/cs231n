@@ -14,13 +14,9 @@ cd cs231n/datasets
 ./get_datasets.sh
 ```
 - [x] Q1: k-Nearest Neighbor classifier, [knn.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment1/knn.ipynb)
-  
 - [x] Q2: Training a Support Vector Machine, [svm.ipynb](https://github.com/RuslanAgishev/cs231n/tree/master/assignment1/svm.ipynb)
-  
 - [x] Q3: Implement a Softmax classifier, [softmax.ipynb](https://github.com/RuslanAgishev/cs231n/tree/master/assignment1/softmax.ipynb)
-  
 - [x] Q4: Two-Layer Neural Network, [two_layer_net.ipynb](https://github.com/RuslanAgishev/cs231n/tree/master/assignment1/two_layer_net.ipynb)
-  
 - [x] Q5: Higher Level Representations: Image Features, [features.ipynb](https://github.com/RuslanAgishev/cs231n/tree/master/assignment1/features.ipynb)
 
 
@@ -33,13 +29,9 @@ cd cs231n/datasets
 ```
 
 - [x] Q1: Fully-connected Neural Network, [FullyConnectedNets.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/FullyConnectedNets.ipynb)
-  
 - [x] Q2: Batch Normalization, [BatchNormalization.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/BatchNormalization.ipynb)
-
 - [x] Q3: Dropout, [Dropout.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/Dropout.ipynb)
-
 - [x] Q4: Convolutional Networks, [ConvolutionalNetworks.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/ConvolutionalNetworks.ipynb)
-
 - [x] Q5: PyTorch/TensorFlow on CIFAR-10, [PyTorch.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/PyTorch.ipynb),
 [TensorFlow.ipynb](https://github.com/RuslanAgishev/cs231n/blob/master/assignment2/TensorFlow.ipynb)
 
